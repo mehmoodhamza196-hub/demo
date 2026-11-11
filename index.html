@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pizza POS · Live demo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8D%95%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#f1f3ef;--panel:#fff;--ink:#16231c;--muted:#66736b;--line:#d9ded8;--green:#1d6b47;--green-d:#134a31;--tomato:#c43b2b;--amber:#e0a526;--soft:#e6efe9;--r:10px}
+*{box-sizing:border-box}html{font-size:15px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.4;font-variant-numeric:tabular-nums}
+h1{font-size:1.5rem;margin:0 0 .6rem}h2{font-size:1.1rem;margin:.2rem 0 .7rem}h3{margin:0 0 .6rem}
+.muted{color:var(--muted)}.bad{color:var(--tomato);font-weight:600}.good{color:var(--green);font-weight:600}.r{text-align:right}.c{text-align:center}
+.demo{background:var(--amber);color:#2b2000;padding:.4rem 1rem;font-size:.9rem;font-weight:600;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center}
+.demo button{font:inherit;font-size:.85rem;background:#2b2000;color:#fff;border:0;border-radius:6px;padding:.15rem .6rem;cursor:pointer}
+.top{display:flex;align-items:center;gap:1rem;background:var(--ink);color:#fff;padding:.5rem 1rem;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.brand{font-weight:700;font-size:1.1rem}
+.roles{display:flex;gap:.25rem;background:#26382f;border-radius:8px;padding:.2rem;margin-left:auto;align-items:center;flex-wrap:wrap}
+.roles span{font-size:.78rem;color:#9fb5a7;padding:0 .5rem}
+.roles button{border:0;background:none;color:#cfe0d6;padding:.35rem .8rem;border-radius:6px;cursor:pointer;font:inherit}
+.roles button.on{background:var(--green);color:#fff;font-weight:600}
+.who{font-size:.85rem;color:#cfe0d6}
+.nav{display:flex;gap:.2rem;background:#fff;border-bottom:1px solid var(--line);padding:.35rem 1rem;overflow-x:auto}
+.nav button{border:0;background:none;padding:.45rem .85rem;border-radius:7px;cursor:pointer;font:inherit;color:var(--ink);white-space:nowrap}
+.nav button:hover{background:var(--soft)}.nav button.on{background:var(--green);color:#fff}
+.btn{display:inline-block;border:1px solid var(--line);background:#fff;color:var(--ink);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}
+.btn:hover{border-color:#aab5ad}.btn.primary{background:var(--green);border-color:var(--green);color:#fff}.btn.primary:hover{background:var(--green-d)}
+.btn.danger{background:var(--tomato);border-color:var(--tomato);color:#fff}.btn.small{padding:.3rem .65rem;font-size:.88rem}.btn.wide{width:100%}.btn.big{font-size:1.15rem;padding:.8rem 1rem}.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
+input,select{font:inherit;padding:.45rem .6rem;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%;color:var(--ink)}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.6rem}label>input:not([type=checkbox]),label>select{display:block;margin-top:.2rem}
+label.check{display:flex;align-items:center;gap:.45rem;color:var(--ink);font-size:.92rem}label.check input{width:auto;margin:0}
+input.short{width:6.5rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:1rem}
+.page{max-width:1150px;margin:1rem auto;padding:0 1rem}.page.narrow{max-width:720px}
+table{width:100%;border-collapse:collapse}th,td{padding:.45rem .5rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:.82rem;color:var(--muted);font-weight:600}
+th.r,td.r{text-align:right}table.kv td:last-child{text-align:right}table.kv tr.strong td{font-weight:700;font-size:1.05rem}
+.scroll{overflow-x:auto}.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}.row.between{justify-content:space-between}
+.badge{padding:.1rem .55rem;border-radius:20px;font-size:.8rem;background:var(--soft)}.badge.refunded{background:#fbe6e3;color:#8a2418}
+.filters{display:flex;gap:.8rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.8rem}.filters label{margin:0}
+.formrow{display:flex;gap:.7rem;align-items:flex-end;flex-wrap:wrap}.formrow label{margin:0}.formrow .grow{flex:1;min-width:170px}.formrow.sub{padding:.55rem 0;border-top:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.8rem;margin-bottom:1rem}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem}.stat span{color:var(--muted);font-size:.85rem;display:block}.stat b{font-size:1.45rem}.stat.good b{color:var(--green)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1rem}.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.bar{display:grid;grid-template-columns:90px 1fr auto;align-items:center;gap:.6rem;margin:.3rem 0}.bar i{display:block;height:14px;background:var(--green);border-radius:3px}
+.perms{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:.3rem .9rem;margin:.6rem 0}
+.pos{display:grid;grid-template-columns:1fr 410px;height:calc(100vh - 150px);min-height:560px}
+.menu-pane{display:flex;flex-direction:column;min-height:0;padding:.8rem}
+.shiftbar{display:flex;gap:1.4rem;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:.5rem .9rem;margin-bottom:.7rem}
+.shiftbar div{display:flex;flex-direction:column;font-size:.78rem;color:var(--muted)}.shiftbar b{font-size:1.05rem;color:var(--ink)}.shiftbar .drawer b{color:var(--green)}.shiftbar button{margin-left:auto}
+.menu-tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem}.menu-tools input{max-width:230px}
+.cats{display:flex;gap:.4rem;flex-wrap:wrap}.cats button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:.4rem .95rem;cursor:pointer;font:inherit}.cats button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;overflow:auto;align-content:start;flex:1;padding-bottom:1rem}
+.tile{background:#fff;border:1px solid var(--line);border-left:5px solid var(--green);border-radius:var(--r);padding:.8rem;text-align:left;cursor:pointer;font:inherit;min-height:84px}
+.tile:hover{border-color:var(--green);box-shadow:0 2px 8px rgba(0,0,0,.08)}.tile b{display:block}.tile span{color:var(--muted);font-size:.85rem}
+.tile.c-Pizza{border-left-color:var(--tomato)}.tile.c-Drinks{border-left-color:#2e6f9e}.tile.c-Sides{border-left-color:var(--amber)}
+.cart-pane{background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding:.7rem}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:.5rem}.types button{padding:.5rem;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}.types button.on{background:var(--green);color:#fff;border-color:var(--green)}
+.custbox{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.5rem}.custbox input{padding:.35rem .5rem}.custbox .full{grid-column:1/-1}
+.cart{flex:1;overflow:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line);min-height:100px}
+.line{display:grid;grid-template-columns:1fr auto auto;gap:.5rem;align-items:center;padding:.5rem .1rem;border-bottom:1px dashed var(--line)}.line small{display:block;color:var(--muted)}
+.qty{display:flex;align-items:center;gap:.3rem}.qty button{width:28px;height:28px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:1rem}.line .x{border:0;background:none;color:var(--tomato);cursor:pointer;font-size:1.1rem}
+.empty{color:var(--muted);text-align:center;padding:2rem 0}
+.onote{margin:.5rem 0 .3rem;padding:.35rem .5rem}.discount{display:grid;grid-template-columns:auto 70px 1fr;gap:.4rem;align-items:center;margin:.2rem 0}.discount label{margin:0}
+.totals div{display:flex;justify-content:space-between;padding:.1rem 0}.totals .grand{font-size:1.5rem;font-weight:700;border-top:2px solid var(--ink);margin-top:.3rem;padding-top:.3rem}.totals .warn{color:var(--tomato);font-size:.85rem}
+.cart-actions{display:grid;grid-template-columns:1fr 1.15fr 1fr 1.5fr;gap:.4rem;margin-top:.4rem}.cart-actions .btn{white-space:nowrap;padding-left:.4rem;padding-right:.4rem}
+.modal{position:fixed;inset:0;background:rgba(20,30,25,.55);display:grid;place-items:center;z-index:50;padding:1rem}.modal.hidden{display:none}
+.modal-box{background:#fff;border-radius:12px;padding:1.2rem;width:100%;max-width:470px;max-height:92vh;overflow:auto}.modal-box.wide{max-width:640px}
+.opt{display:flex;align-items:center;gap:.5rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;margin-bottom:.4rem;color:var(--ink);font-size:1rem;cursor:pointer}.opt input{width:auto;margin:0}.opt b{margin-left:auto}
+.actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem}
+.due{font-size:1.1rem;display:flex;justify-content:space-between;margin-bottom:.6rem}.due b{font-size:1.7rem}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:.8rem}
+.pinfo{background:var(--soft);padding:.6rem .8rem;border-radius:8px;margin-top:.4rem}.pinfo.err{background:#fbe6e3;color:#8a2418}
+.done{text-align:center}.done .tick{font-size:2.4rem;color:var(--green)}.done .chg{font-size:1.6rem;font-weight:700;color:#a87400}
+.heldrow{display:flex;justify-content:space-between;gap:.5rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--line)}
+.rc{width:302px;margin:0 auto;background:#fff;padding:12px;font-family:"Courier New",monospace;font-size:13px;color:#000;border:1px dashed #bbb}
+.rc h2{text-align:center;margin:0 0 4px;font-size:18px}.rc hr{border:0;border-top:1px dashed #000;margin:7px 0}.rc .l{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+.rc .sub{padding-left:14px;font-size:12px}.rc .total{font-size:16px;font-weight:700;border-top:1px solid #000;margin-top:4px;padding-top:4px}.rc .big{font-size:42px;font-weight:700;text-align:center}.rc .stamp{text-align:center;font-size:22px;font-weight:700;border:2px solid #000;margin:8px 0;padding:4px}
+.rc.kitchen{font-size:16px}.rc .kl{padding:4px 0;font-size:17px}.c-t{text-align:center}
+.toast{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.6rem 1rem;border-radius:8px;z-index:90;font-size:.95rem}
+.lock{max-width:560px;margin:3rem auto;text-align:center}
+@media print{body *{visibility:hidden}#receipt,#receipt *{visibility:visible}#receipt{position:absolute;left:0;top:0;border:0}}
+@media(max-width:900px){.pos{grid-template-columns:1fr;height:auto}.cart-pane{border-left:0;border-top:2px solid var(--line)}.roles{margin-left:0}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal" class="modal hidden"><div class="modal-box" id="mbox"></div></div>
+<script>
+(() => {
+"use strict";
+const KEY = "pizzaDemo.v2", DAY = 864e5;
+const $ = (s, e = document) => e.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const isoDay = ts => { const d = new Date(ts); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+const dKey = ts => isoDay(ts).replace(/-/g, "");
+const hm = ts => { const d = new Date(ts); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+const stamp = ts => isoDay(ts) + " " + hm(ts);
+const day0 = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const fmt = n => { n = Number(n) || 0; const w = Math.abs(n - Math.round(n)) < .005; return n.toLocaleString("en-US", { minimumFractionDigits: w ? 0 : 2, maximumFractionDigits: w ? 0 : 2 }); };
+const r2 = n => Math.round(n * 100) / 100;
+const orderCode = o => dKey(o.ts) + "-" + String(o.no).padStart(3, "0");
+const TYPES = { dine_in: "Dine-in", takeaway: "Takeaway", delivery: "Delivery" };
+
+const PERMS = [
+  ["take_order", "Cashier: open shift, take orders, hold orders, take payments, print bills"],
+  ["apply_discount", "Cashier: give discounts up to the cashier limit"],
+  ["discount_override", "Give discounts above the cashier limit"],
+  ["view_own_orders", "View own orders (today only)"],
+  ["view_all_orders", "View all orders, any date"],
+  ["refund_orders", "Refund orders"],
+  ["manage_inventory", "Ingredients, stock-in, wastage and stock count"],
+  ["manage_menu", "Add and edit menu items, prices, add-ons and recipes"],
+  ["view_reports", "See the dashboard and today's sales report"],
+  ["view_reports_full", "Reports for any date range and CSV export"],
+  ["view_profit", "See cost and profit figures"],
+  ["view_all_shifts", "See every cashier's shift and cash difference"],
+  ["manage_roles", "Assign permission tokens to roles"],
+  ["manage_settings", "Change shop details, tax and limits"],
+  ["view_audit", "View the audit log"]
+];
+const CASHIER = ["take_order", "apply_discount", "view_own_orders"];
+const MANAGER = CASHIER.concat(["discount_override", "view_all_orders", "refund_orders", "manage_inventory", "manage_menu", "view_reports", "view_all_shifts"]);
+const NAV = [
+  ["pos", "Billing", ["take_order"]], ["shift", "My shift", ["take_order"]], ["orders", "Orders", ["view_own_orders", "view_all_orders"]],
+  ["dash", "Dashboard", ["view_reports"]], ["reports", "Sales reports", ["view_reports"]], ["shifts", "Cashier shifts", ["view_all_shifts"]],
+  ["menu", "Menu and recipes", ["manage_menu"]], ["inventory", "Inventory", ["manage_inventory"]], ["roles", "Roles and tokens", ["manage_roles"]],
+  ["settings", "Settings", ["manage_settings"]], ["audit", "Audit log", ["view_audit"]]
+];
+
+let S, ui = { view: null, cat: "All", cart: [], type: "dine_in", table: "", name: "", phone: "", addr: "", note: "", dtype: "percent", dval: "", search: "",
+              from: null, to: null, ofrom: null, oto: null, oq: "", ostatus: "", shiftId: null, heldId: null };
+let memory = null;
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { memory = JSON.stringify(S); } };
+
+/* ---------- data: seed ---------- */
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function seedData() {
+  const R = rng(11), pick = a => a[Math.floor(R() * a.length)], wpick = (a, w) => { let x = R() * w.reduce((s, v) => s + v, 0); for (let i = 0; i < a.length; i++) { x -= w[i]; if (x < 0) return a[i]; } return a[a.length - 1]; };
+  const now = Date.now(), today0 = day0(now);
+  const s = { v: 2, role: "cashier", settings: { shop: "Roma Pizza House", address: "Main Boulevard, Islamabad", phone: "0300-1234567", currency: "Rs", taxName: "GST", taxRate: 16, maxDiscount: 10, requireShift: true, footer: "Thank you! See you again." },
+    roles: { cashier: { name: "Cashier", user: "Ahmed Khan", perms: CASHIER.slice() }, manager: { name: "Manager", user: "Bilal Raza", perms: MANAGER.slice() }, owner: { name: "Owner", user: "Imran Sheikh", admin: true, perms: [] } },
+    menu: [], addons: [], ing: [], rec: {}, arec: {}, orders: [], shifts: [], held: [], log: [], audit: [], id: { order: 1, shift: 1, item: 1, v: 1, ing: 1, addon: 1 }, anchor: today0 - DAY };
+  const ING = {};
+  [["Dough", "g", 20000, 5000, .25], ["Pizza sauce", "g", 8000, 2000, .5], ["Mozzarella cheese", "g", 15000, 4000, 1.8], ["Chicken", "g", 10000, 2000, 1.2], ["Pepperoni", "g", 4000, 1000, 2.5],
+   ["Olives", "g", 2000, 500, 1.5], ["Jalapenos", "g", 1500, 400, 1], ["Pizza box", "pcs", 300, 50, 40], ["Cola 345ml", "pcs", 120, 24, 55], ["Water bottle", "pcs", 100, 24, 30],
+   ["Potato fries", "g", 8000, 2000, .35], ["Garlic bread", "pcs", 60, 15, 40]].forEach(([name, unit, stock, reorder, cost]) => { const id = s.id.ing++; ING[name] = id; s.ing.push({ id, name, unit, stock, reorder, cost }); });
+  const item = (cat, name, addons, vars) => { const it = { id: s.id.item++, cat, name, addons, active: true, variants: [] }; vars.forEach(([label, price, recipe]) => { const v = { id: s.id.v++, label, price }; it.variants.push(v); s.rec[v.id] = {}; Object.entries(recipe).forEach(([k, q]) => s.rec[v.id][ING[k]] = q); }); s.menu.push(it); };
+  const base = { S: [150, 50, 80], M: [250, 80, 140], L: [350, 110, 200] };
+  const pizza = (name, prices, top) => item("Pizza", name, true, [["Small", "S", 1], ["Medium", "M", 1.7], ["Large", "L", 2.3]].map(([label, k, m], i) => { const [d, sa, ch] = base[k], r = { "Dough": d, "Pizza sauce": sa, "Mozzarella cheese": ch, "Pizza box": 1 }; if (top) r[top[0]] = top[1] * m; return [label, prices[i], r]; }));
+  pizza("Margherita", [550, 950, 1300]); pizza("Pepperoni", [650, 1150, 1500], ["Pepperoni", 30]); pizza("Chicken Fajita", [650, 1100, 1450], ["Chicken", 60]); pizza("BBQ Chicken Tikka", [650, 1100, 1450], ["Chicken", 60]);
+  item("Sides", "Garlic Bread", false, [["Regular", 250, { "Garlic bread": 1 }]]); item("Sides", "Fries", false, [["Regular", 200, { "Potato fries": 150 }], ["Large", 300, { "Potato fries": 250 }]]);
+  item("Drinks", "Cola 345ml", false, [["Regular", 100, { "Cola 345ml": 1 }]]); item("Drinks", "Water", false, [["Regular", 60, { "Water bottle": 1 }]]);
+  [["Extra cheese", 150, "Mozzarella cheese", 50], ["Olives", 80, "Olives", 20], ["Jalapenos", 80, "Jalapenos", 20]].forEach(([name, price, ing, q]) => { const id = s.id.addon++; s.addons.push({ id, name, price }); s.arec[id] = { [ING[ing]]: q }; });
+  S = s;                                         // helpers below read S
+  const dayCount = {}, names = ["Sara Ahmed", "Usman Ali", "Maria Khan", "Daniyal Shah", "Ayesha Noor", "Hamza Iqbal"];
+  const mk = (ts, shiftId, user) => {
+    const lines = []; const n = wpick([1, 2, 3, 4], [5, 4, 2, 1]);
+    for (let i = 0; i < n; i++) { const cat = wpick(["Pizza", "Sides", "Drinks"], [6, 2, 2]); const it = pick(S.menu.filter(m => m.cat === cat)); const v = pick(it.variants);
+      const ads = it.addons ? S.addons.filter(() => R() < .25).map(a => a.id) : []; lines.push({ vid: v.id, qty: wpick([1, 2, 3], [9, 2, 1]), addons: ads, note: "" }); }
+    const pct = wpick([0, 5, 10], [8, 1, 1]), t = calc(lines, "percent", pct), type = wpick(Object.keys(TYPES), [5, 3, 2]), mode = wpick(["cash", "card", "online", "split"], [55, 22, 15, 8]);
+    let pay; if (mode === "cash") pay = { cash: t.total, card: 0, online: 0 }; else if (mode === "card") pay = { cash: 0, card: t.total, online: 0 }; else if (mode === "online") pay = { cash: 0, card: 0, online: t.total };
+    else { const c = Math.round(t.total / 2); pay = { cash: r2(t.total - c), card: c, online: 0 }; }
+    const k = dKey(ts); dayCount[k] = (dayCount[k] || 0) + 1;
+    S.orders.push({ id: S.id.order++, no: dayCount[k], ts, user, shiftId, type, table: type === "dine_in" ? String(1 + Math.floor(R() * 12)) : "", name: type !== "dine_in" ? pick(names) : "", phone: "", addr: type === "delivery" ? "House " + (1 + Math.floor(R() * 60)) + ", Street " + (1 + Math.floor(R() * 20)) : "",
+      note: "", items: t.items, subtotal: t.subtotal, discount: t.discount, tax: t.tax, total: t.total, status: "paid", pay, refund: null });
+  };
+  for (let d = 7; d >= 1; d--) {
+    const base0 = today0 - d * DAY;
+    [["Ahmed Khan", 11.5, 6, 5000, 5 + Math.floor(R() * 4)], ["Hina Malik", 17.5, 5, 6000, 8 + Math.floor(R() * 6)]].forEach(([user, startH, hours, opening, n], idx) => {
+      const sh = { id: S.id.shift++, user, openedAt: base0 + startH * 36e5, opening, closedAt: null, counted: null, expected: null, diff: null }; S.shifts.push(sh);
+      const step = hours * 60 / (n + 1); let t = sh.openedAt;
+      for (let i = 0; i < n; i++) { t += (step * (.5 + R() * .5)) * 6e4; mk(t, sh.id, user); }
+      const cash = S.orders.filter(o => o.shiftId === sh.id).reduce((a, o) => a + o.pay.cash, 0);
+      sh.closedAt = t + 10 * 6e4; sh.expected = r2(opening + cash); sh.counted = r2(sh.expected + (d === 1 && idx === 1 ? -150 : pick([0, 0, 0, 0, -50, 100]))); sh.diff = r2(sh.counted - sh.expected);
+      S.audit.push({ ts: sh.openedAt, who: user, action: "shift_open", detail: "opening balance " + opening }, { ts: sh.closedAt, who: user, action: "shift_close", detail: "expected " + sh.expected + " counted " + sh.counted + " difference " + sh.diff });
+    });
+    if (d === 4) { const o = S.orders.filter(x => isoDay(x.ts) === isoDay(base0))[2]; if (o) { o.status = "refunded"; o.refund = { ts: base0 + 21 * 36e5, user: "Bilal Raza", reason: "Customer complaint, wrong topping", shiftId: null }; S.audit.push({ ts: o.refund.ts, who: "Bilal Raza", action: "refund", detail: orderCode(o) + " total " + o.total }); } }
+  }
+  // today: Hina's shift is open with a few orders so the dashboard is alive
+  const sh = { id: S.id.shift++, user: "Hina Malik", openedAt: Math.min(now - 3 * 36e5, today0 + 11 * 36e5), opening: 6000, closedAt: null, counted: null, expected: null, diff: null }; S.shifts.push(sh);
+  S.audit.push({ ts: sh.openedAt, who: "Hina Malik", action: "shift_open", detail: "opening balance 6000" });
+  [150, 95, 50, 20].forEach(m => { const ts = Math.max(sh.openedAt + 6e4, now - m * 6e4); mk(ts, sh.id, "Hina Malik"); });
+  [["Dough", 14200], ["Pizza sauce", 5600], ["Mozzarella cheese", 3200], ["Chicken", 6400], ["Pepperoni", 850], ["Olives", 1400], ["Jalapenos", 1100], ["Pizza box", 142], ["Cola 345ml", 18], ["Water bottle", 64], ["Potato fries", 5200], ["Garlic bread", 33]]
+    .forEach(([n, v]) => { S.ing.find(i => i.name === n).stock = v; });
+  S.log.push({ ts: today0 - 4 * DAY + 9.5 * 36e5, ing: "Mozzarella cheese", change: 8000, reason: "purchase", by: "Imran Sheikh" }, { ts: today0 - 4 * DAY + 9.5 * 36e5, ing: "Cola 345ml", change: 48, reason: "purchase", by: "Imran Sheikh" });
+  S.audit.sort((a, b) => a.ts - b.ts);
+}
+function load() {
+  let raw = null; try { raw = localStorage.getItem(KEY); } catch (e) { raw = memory; }
+  if (raw) { try { S = JSON.parse(raw); } catch (e) { S = null; } }
+  if (!S || S.v !== 2) { seedData(); save(); return; }
+  const want = day0(Date.now()) - DAY, delta = Math.round((want - S.anchor) / DAY);   // keep the sample history ending "yesterday"
+  if (delta > 0) { const sh = delta * DAY; S.orders.forEach(o => { o.ts += sh; if (o.refund) o.refund.ts += sh; }); S.shifts.forEach(x => { x.openedAt += sh; if (x.closedAt) x.closedAt += sh; });
+    S.audit.forEach(a => a.ts += sh); S.log.forEach(l => l.ts += sh); S.held.forEach(h => h.ts += sh); S.anchor += sh; save(); }
+}
+
+/* ---------- logic ---------- */
+const role = () => S.roles[S.role];
+const can = p => role().admin || role().perms.includes(p);
+const anyCan = a => a.some(can);
+const me = () => role().user;
+const audit = (action, detail) => { S.audit.push({ ts: Date.now(), who: me() + " (" + role().name + ")", action, detail }); if (S.audit.length > 400) S.audit.shift(); };
+function findVariant(vid) { for (const it of S.menu) { const v = it.variants.find(x => x.id === vid); if (v) return { it, v }; } return null; }
+function usage(vid, addonIds, qty) { const u = {}; Object.entries(S.rec[vid] || {}).forEach(([i, q]) => u[i] = (u[i] || 0) + q * qty); addonIds.forEach(a => Object.entries(S.arec[a] || {}).forEach(([i, q]) => u[i] = (u[i] || 0) + q * qty)); return u; }
+function costOf(vid, addonIds) { return r2(Object.entries(usage(vid, addonIds, 1)).reduce((a, [i, q]) => a + q * (S.ing.find(x => x.id == i)?.cost || 0), 0)); }
+function calc(lines, dtype, dval) {
+  const items = lines.map(l => { const { it, v } = findVariant(l.vid); const ads = (l.addons || []).map(id => S.addons.find(a => a.id === id)).filter(Boolean);
+    return { vid: v.id, name: it.name + (v.label === "Regular" ? "" : " (" + v.label + ")"), cat: it.cat, qty: l.qty, unit: v.price + ads.reduce((s, a) => s + a.price, 0), addons: ads.map(a => ({ id: a.id, name: a.name, price: a.price })), note: l.note || "", cost: costOf(v.id, ads.map(a => a.id)) }; });
+  const subtotal = r2(items.reduce((s, i) => s + i.unit * i.qty, 0)); let d = dtype === "percent" ? subtotal * (+dval || 0) / 100 : +dval || 0; const discount = r2(Math.min(Math.max(d, 0), subtotal));
+  const tax = r2((subtotal - discount) * S.settings.taxRate / 100); return { items, subtotal, discount, tax, total: r2(subtotal - discount + tax), pct: subtotal ? discount / subtotal * 100 : 0 };
+}
+const openShift = () => S.shifts.find(s => s.user === me() && !s.closedAt);
+function shiftSummary(sh) {
+  const os = S.orders.filter(o => o.shiftId === sh.id); let cash = 0, card = 0, online = 0, refunds = 0;
+  os.forEach(o => { cash += o.pay.cash; card += o.pay.card; online += o.pay.online; });
+  S.orders.filter(o => o.refund && o.refund.shiftId === sh.id).forEach(o => { cash -= o.pay.cash; card -= o.pay.card; online -= o.pay.online; refunds += o.total; });
+  const paid = os.filter(o => o.status === "paid");
+  return { opening: sh.opening, cash: r2(cash), card: r2(card), online: r2(online), refunds: r2(refunds), expected: r2(sh.opening + cash), orders: paid.length, sales: r2(paid.reduce((s, o) => s + o.total, 0)), discounts: r2(paid.reduce((s, o) => s + o.discount, 0)), tax: r2(paid.reduce((s, o) => s + o.tax, 0)) };
+}
+function deduct(items, sign, ref) { items.forEach(it => Object.entries(usage(it.vid, it.addons.map(a => a.id), it.qty)).forEach(([i, q]) => { const g = S.ing.find(x => x.id == i); if (g) g.stock = r2(g.stock + sign * q); })); }
+const toast = m => { const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); };
+function showModal(html, wide) { $("#mbox").className = "modal-box" + (wide ? " wide" : ""); $("#mbox").innerHTML = html; $("#modal").classList.remove("hidden"); }
+function hideModal() { $("#modal").classList.add("hidden"); $("#mbox").innerHTML = ""; }
+const rs = n => S.settings.currency + " " + fmt(n);
+
+/* ---------- views ---------- */
+const money = rs;
+function receiptHTML(o, kitchen) {
+  const it = o.items.map(i => kitchen ? `<div class="kl"><b>${i.qty} x</b> ${esc(i.name)}${i.addons.map(a => `<div>+ ${esc(a.name)}</div>`).join("")}${i.note ? `<div>** ${esc(i.note)}</div>` : ""}</div>`
+    : `<div class="l"><span>${i.qty} x ${esc(i.name)}</span><span>${fmt(i.qty * i.unit)}</span></div>${i.addons.map(a => `<div class="sub">+ ${esc(a.name)}</div>`).join("")}${i.note ? `<div class="sub">${esc(i.note)}</div>` : ""}`).join("");
+  if (kitchen) return `<div class="rc kitchen" id="receipt"><h2>KITCHEN</h2><div class="big">#${String(o.no).padStart(3, "0")}</div><div class="c-t">${TYPES[o.type]}${o.table ? " · Table " + esc(o.table) : ""}</div><div class="c-t">${hm(o.ts)}</div><hr>${it}${o.note ? `<hr><div>NOTE: ${esc(o.note)}</div>` : ""}</div>`;
+  const pays = [["cash", o.pay.cash], ["card", o.pay.card], ["online", o.pay.online]].filter(p => p[1] > 0).map(p => `<div class="l"><span>Paid by ${p[0]}</span><span>${fmt(p[1])}</span></div>`).join("");
+  return `<div class="rc" id="receipt"><h2>${esc(S.settings.shop)}</h2><div class="c-t">${esc(S.settings.address)}<br>${esc(S.settings.phone)}</div><hr>
+    <div class="l"><span>Order</span><span>${orderCode(o)}</span></div><div class="l"><span>Date</span><span>${stamp(o.ts)}</span></div><div class="l"><span>Cashier</span><span>${esc(o.user)}</span></div>
+    <div class="l"><span>Type</span><span>${TYPES[o.type]}${o.table ? " · T" + esc(o.table) : ""}</span></div>${o.name ? `<div class="l"><span>Customer</span><span>${esc(o.name)}</span></div>` : ""}${o.addr ? `<div>${esc(o.addr)}</div>` : ""}<hr>${it}<hr>
+    <div class="l"><span>Subtotal</span><span>${fmt(o.subtotal)}</span></div>${o.discount ? `<div class="l"><span>Discount</span><span>-${fmt(o.discount)}</span></div>` : ""}
+    <div class="l"><span>${esc(S.settings.taxName)} (${S.settings.taxRate}%)</span><span>${fmt(o.tax)}</span></div><div class="l total"><span>TOTAL</span><span>${rs(o.total)}</span></div>${pays}
+    ${o.status === "refunded" ? '<div class="stamp">REFUNDED</div>' : ""}<hr><div class="c-t">${esc(S.settings.footer)}</div></div>`;
+}
+function showReceipt(o, kitchen) { showModal(receiptHTML(o, kitchen) + `<div class="actions"><button class="btn" data-act="closeModal">Close</button><button class="btn primary" data-act="print">Print</button></div>`); }
+
+function viewPOS() {
+  const sh = openShift();
+  if (!sh && S.settings.requireShift) return `<div class="page narrow"><div class="card"><h1>Open your shift</h1><p class="muted">Count the cash in the drawer and enter it as your opening balance.</p>
+    <label>Opening balance (${esc(S.settings.currency)})<input id="open-bal" type="number" min="0" step="any" value="5000"></label><button class="btn primary wide" data-act="openShift">Open shift and start billing</button></div></div>`;
+  return `<div class="pos"><section class="menu-pane"><div class="shiftbar" id="shiftbar"></div><div class="menu-tools"><input id="search" type="search" placeholder="Search the menu" value="${esc(ui.search)}"><div class="cats" id="cats"></div></div><div class="grid" id="grid"></div></section>
+  <aside class="cart-pane"><div class="types" id="types">${Object.entries(TYPES).map(([k, v]) => `<button data-act="type" data-v="${k}" class="${ui.type === k ? "on" : ""}">${v}</button>`).join("")}</div>
+  <div class="custbox" id="cust"></div><div class="cart" id="cart"></div><input id="f-note" class="onote" placeholder="Order note for the kitchen (optional)" value="${esc(ui.note)}">
+  ${can("apply_discount") ? `<div class="discount"><label>Discount</label><select id="dtype"><option value="percent" ${ui.dtype === "percent" ? "selected" : ""}>%</option><option value="fixed" ${ui.dtype === "fixed" ? "selected" : ""}>${esc(S.settings.currency)}</option></select><input id="dval" type="number" min="0" step="any" placeholder="0" value="${esc(ui.dval)}"></div>` : ""}
+  <div class="totals" id="totals"></div><div class="cart-actions"><button class="btn" data-act="hold">Hold</button><button class="btn" data-act="held" id="b-held">Held (${S.held.filter(h => h.user === me()).length})</button><button class="btn" data-act="clear">Clear</button><button class="btn primary big" data-act="pay" id="b-pay">Pay</button></div></aside></div>`;
+}
+function drawShiftbar() { const sh = openShift(), el = $("#shiftbar"); if (!el) return; if (!sh) { el.innerHTML = '<span class="muted">Shift tracking is off.</span>'; return; } const s = shiftSummary(sh);
+  el.innerHTML = `<div><span>Opening balance</span><b>${rs(s.opening)}</b></div><div><span>Cash taken (net)</span><b>${rs(s.cash)}</b></div><div class="drawer"><span>Should be in drawer</span><b>${rs(s.expected)}</b></div><div><span>Card + online</span><b>${rs(s.card + s.online)}</b></div><div><span>Orders</span><b>${s.orders}</b></div><button class="btn small" data-act="goShift">Close shift</button>`; }
+function drawMenu() { const cats = ["All"].concat([...new Set(S.menu.filter(m => m.active).map(m => m.cat))]); $("#cats").innerHTML = cats.map(c => `<button data-act="cat" data-v="${esc(c)}" class="${c === ui.cat ? "on" : ""}">${esc(c)}</button>`).join("");
+  const t = ui.search.trim().toLowerCase(), list = S.menu.filter(m => m.active && m.variants.length && (ui.cat === "All" || m.cat === ui.cat) && (!t || m.name.toLowerCase().includes(t)));
+  $("#grid").innerHTML = list.map(m => `<button class="tile c-${esc(m.cat)}" data-act="item" data-v="${m.id}"><b>${esc(m.name)}</b><span>${m.variants.length > 1 ? "from " : ""}${rs(Math.min(...m.variants.map(v => v.price)))}</span></button>`).join("") || '<p class="muted">No menu items match.</p>'; }
+function drawCust() { const f = (k, ph, cls) => `<input class="${cls || ""}" data-k="${k}" placeholder="${ph}" value="${esc(ui[k])}">`;
+  $("#cust").innerHTML = ui.type === "dine_in" ? f("table", "Table number", "full") : f("name", "Customer name") + f("phone", "Phone") + (ui.type === "delivery" ? f("addr", "Delivery address", "full") : ""); }
+function cartTotals() { return calc(ui.cart.map(l => ({ vid: l.vid, qty: l.qty, addons: l.addons, note: l.note })), ui.dtype, ui.dval); }
+function drawCart() {
+  const t = ui.cart.length ? cartTotals() : { items: [], subtotal: 0, discount: 0, tax: 0, total: 0, pct: 0 };
+  $("#cart").innerHTML = ui.cart.length ? t.items.map((l, i) => `<div class="line"><div><b>${esc(l.name)}</b>${l.addons.map(a => `<small>+ ${esc(a.name)}</small>`).join("")}${l.note ? `<small>${esc(l.note)}</small>` : ""}</div>
+    <div class="qty"><button data-act="qty" data-i="${i}" data-d="-1">−</button><b>${l.qty}</b><button data-act="qty" data-i="${i}" data-d="1">+</button></div><div><b>${rs(l.unit * l.qty)}</b> <button class="x" data-act="del" data-i="${i}">✕</button></div></div>`).join("") : '<div class="empty">Tap menu items to start an order</div>';
+  const high = t.discount > 0 && t.pct > S.settings.maxDiscount + 1e-9 && !can("discount_override");
+  $("#totals").innerHTML = `<div><span>Subtotal</span><span>${rs(t.subtotal)}</span></div>${t.discount ? `<div><span>Discount</span><span>- ${rs(t.discount)}</span></div>` : ""}<div><span>${esc(S.settings.taxName)} (${S.settings.taxRate}%)</span><span>${rs(t.tax)}</span></div><div class="grand"><span>Total</span><span>${rs(t.total)}</span></div>${high ? `<div class="warn">Discounts above ${S.settings.maxDiscount}% need a manager.</div>` : ""}`;
+  $("#b-pay").disabled = !ui.cart.length || high;
+}
+function addLine(it, v, ads, qty, note) { const key = [v.id, ads.map(a => a.id).sort().join(","), note].join("|"); const f = ui.cart.find(l => l.key === key);
+  if (f) f.qty = Math.min(99, f.qty + qty); else ui.cart.push({ key, vid: v.id, qty, note, addons: ads.map(a => a.id) }); drawCart(); }
+function openItem(id) {
+  const it = S.menu.find(m => m.id === id); const ads = it.addons ? S.addons : [];
+  if (it.variants.length === 1 && !ads.length) { addLine(it, it.variants[0], [], 1, ""); return; }
+  showModal(`<h3>${esc(it.name)}</h3>${it.variants.map((v, i) => `<label class="opt"><input type="radio" name="v" value="${v.id}" ${i === (it.variants.length > 1 ? 1 : 0) ? "checked" : ""}> ${esc(v.label)}<b>${rs(v.price)}</b></label>`).join("")}
+    ${ads.length ? `<p class="muted">Extras</p>${ads.map(a => `<label class="opt"><input type="checkbox" name="a" value="${a.id}"> ${esc(a.name)}<b>+ ${rs(a.price)}</b></label>`).join("")}` : ""}
+    <div class="formrow"><label>Quantity<input id="m-qty" type="number" min="1" max="99" value="1" class="short"></label><label class="grow">Note<input id="m-note" maxlength="120" placeholder="e.g. no onions, well done"></label></div>
+    <div class="actions"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" id="m-add">Add to order</button></div>`);
+  $("#m-add").onclick = () => { const vid = +$("input[name=v]:checked", $("#mbox")).value, v = it.variants.find(x => x.id === vid);
+    const sel = [...$("#mbox").querySelectorAll("input[name=a]:checked")].map(x => S.addons.find(a => a.id === +x.value)); addLine(it, v, sel, Math.max(1, Math.min(99, +$("#m-qty").value || 1)), $("#m-note").value.trim()); hideModal(); };
+}
+function openPay() {
+  const t = cartTotals(); showModal(`<h3>Payment</h3><div class="due"><span>Total due</span><b>${rs(t.total)}</b></div><div class="quick"><button class="btn" data-q="cash">Cash</button><button class="btn" data-q="card">Card</button><button class="btn" data-q="online">Online</button></div>
+    <label>Cash received<input id="p-cash" type="number" step="any" min="0" value="${t.total}"></label><label>Card amount<input id="p-card" type="number" step="any" min="0" value="0"></label><label>Online / wallet amount<input id="p-online" type="number" step="any" min="0" value="0"></label>
+    <div class="pinfo" id="p-info"></div><div class="actions"><button class="btn" data-act="closeModal">Back</button><button class="btn primary" id="p-go">Complete order</button></div>`);
+  const f = { cash: $("#p-cash"), card: $("#p-card"), online: $("#p-online") };
+  const calcPay = () => { const card = +f.card.value || 0, online = +f.online.value || 0, due = r2(t.total - card - online), got = +f.cash.value || 0, info = $("#p-info"); info.classList.remove("err"); $("#p-go").disabled = false;
+    if (due < -.005) { info.classList.add("err"); info.textContent = "Card and online amounts are more than the total."; $("#p-go").disabled = true; }
+    else if (due > .005 && got + .005 < due) { info.classList.add("err"); info.textContent = `Cash due is ${rs(due)}. Received amount is too low.`; $("#p-go").disabled = true; }
+    else info.innerHTML = due > .005 ? `Cash due ${rs(due)} · change to give back <b>${rs(got - due)}</b>` : "No cash to collect."; return { card, online, due, got }; };
+  Object.values(f).forEach(i => i.addEventListener("input", calcPay));
+  $("#mbox").querySelector(".quick").onclick = e => { const k = e.target.dataset.q; if (!k) return; f.cash.value = k === "cash" ? t.total : 0; f.card.value = k === "card" ? t.total : 0; f.online.value = k === "online" ? t.total : 0; calcPay(); };
+  calcPay(); f.cash.select();
+  $("#p-go").onclick = () => { const p = calcPay(); if ($("#p-go").disabled) return; const sh = openShift(); const k = dKey(Date.now()); const no = S.orders.filter(o => dKey(o.ts) === k).length + 1;
+    const o = { id: S.id.order++, no, ts: Date.now(), user: me(), shiftId: sh ? sh.id : null, type: ui.type, table: ui.table, name: ui.name, phone: ui.phone, addr: ui.addr, note: ui.note, items: t.items, subtotal: t.subtotal, discount: t.discount, tax: t.tax, total: t.total, status: "paid",
+      pay: { cash: Math.max(p.due, 0), card: p.card, online: p.online }, refund: null };
+    S.orders.push(o); deduct(t.items, -1); if (ui.heldId) S.held = S.held.filter(h => h.id !== ui.heldId); audit("order", orderCode(o) + " total " + o.total + (o.discount ? " discount " + o.discount : "")); save();
+    ui.cart = []; ui.heldId = null; ui.dval = ""; ui.note = ""; ui.table = ui.name = ui.phone = ui.addr = ""; render(); const change = p.due > .005 ? r2(p.got - p.due) : 0;
+    showModal(`<div class="done"><div class="tick">✓</div><h3>Order ${orderCode(o)} paid</h3><p>Total ${rs(o.total)}</p>${change > 0 ? `<p>Give change<br><span class="chg">${rs(change)}</span></p>` : ""}<div class="row" style="justify-content:center"><button class="btn" id="d-r">Print receipt</button><button class="btn" id="d-k">Kitchen slip</button></div><div class="actions"><button class="btn primary wide" data-act="closeModal">New order</button></div></div>`);
+    $("#d-r").onclick = () => showReceipt(o, false); $("#d-k").onclick = () => showReceipt(o, true); };
+}
+function viewShift() {
+  const sh = openShift(), mine = S.shifts.filter(s => s.user === me() && s.closedAt).slice(-8).reverse();
+  let out = `<div class="page narrow">`;
+  if (!sh) out += `<div class="card"><h1>Open your shift</h1><p class="muted">Count the cash in the drawer and enter it as your opening balance.</p><label>Opening balance (${esc(S.settings.currency)})<input id="open-bal" type="number" min="0" step="any" value="5000"></label><button class="btn primary wide" data-act="openShift">Open shift and start billing</button></div>`;
+  else { const s = shiftSummary(sh); out += `<div class="card"><h1>Current shift</h1><p class="muted">Opened ${stamp(sh.openedAt)}</p><table class="kv"><tr><td>Opening balance</td><td>${rs(s.opening)}</td></tr><tr><td>Cash taken (after refunds)</td><td>${rs(s.cash)}</td></tr><tr class="strong"><td>Cash that should be in the drawer</td><td>${rs(s.expected)}</td></tr><tr><td>Card payments</td><td>${rs(s.card)}</td></tr><tr><td>Online payments</td><td>${rs(s.online)}</td></tr><tr><td>Orders / total sales</td><td>${s.orders} / ${rs(s.sales)}</td></tr></table></div>
+    <div class="card"><h2>Close shift</h2><p class="muted">Count the cash in the drawer. The system compares it with the amount above.</p><label>Cash counted in drawer (${esc(S.settings.currency)})<input id="counted" type="number" min="0" step="any"></label><label>Note (optional)<input id="close-note" maxlength="200"></label><button class="btn danger wide" data-act="closeShift">Close shift and see closing report</button></div>`; }
+  if (mine.length) out += `<div class="card"><h2>My recent shifts</h2><table><tr><th>Opened</th><th>Opening</th><th>Counted</th><th>Difference</th><th></th></tr>${mine.map(r => `<tr><td>${stamp(r.openedAt)}</td><td>${rs(r.opening)}</td><td>${rs(r.counted)}</td><td class="${Math.abs(r.diff) > .5 ? "bad" : ""}">${rs(r.diff)}</td><td><a href="#" data-act="report" data-v="${r.id}">Report</a></td></tr>`).join("")}</table></div>`;
+  return out + "</div>";
+}
+function viewShiftReport() {
+  const sh = S.shifts.find(s => s.id === ui.shiftId); if (!sh) return "<div class='page'>Not found.</div>"; const s = shiftSummary(sh), os = S.orders.filter(o => o.shiftId === sh.id);
+  return `<div class="page narrow"><div class="card"><div class="row between"><h1>Shift report #${sh.id}</h1><button class="btn" data-act="print">Print</button></div><p class="muted">${esc(sh.user)} · opened ${stamp(sh.openedAt)}${sh.closedAt ? " · closed " + stamp(sh.closedAt) : " · still open"}</p>
+    <table class="kv"><tr><td>Opening balance</td><td>${rs(s.opening)}</td></tr><tr><td>Cash taken (after refunds)</td><td>${rs(s.cash)}</td></tr><tr class="strong"><td>Expected closing balance</td><td>${rs(s.expected)}</td></tr>
+    ${sh.closedAt ? `<tr class="strong"><td>Counted closing balance</td><td>${rs(sh.counted)}</td></tr><tr class="strong"><td>Difference (counted minus expected)</td><td class="${Math.abs(sh.diff) > .5 ? "bad" : "good"}">${rs(sh.diff)}${Math.abs(sh.diff) <= .5 ? " ✓ matches" : sh.diff < 0 ? " short" : " over"}</td></tr>` : ""}
+    <tr><td>Card payments</td><td>${rs(s.card)}</td></tr><tr><td>Online payments</td><td>${rs(s.online)}</td></tr><tr><td>Refunds paid out</td><td>${rs(s.refunds)}</td></tr><tr><td>Discounts given</td><td>${rs(s.discounts)}</td></tr><tr><td>${esc(S.settings.taxName)} collected</td><td>${rs(s.tax)}</td></tr><tr><td>Paid orders / total sales</td><td>${s.orders} / ${rs(s.sales)}</td></tr></table>${sh.note ? `<p>Note: ${esc(sh.note)}</p>` : ""}</div>
+    <div class="card"><h2>Orders in this shift</h2><table><tr><th>Order</th><th>Time</th><th>Type</th><th class="r">Total</th><th>Status</th></tr>${os.map(o => `<tr><td><a href="#" data-act="order" data-v="${o.id}">${orderCode(o)}</a></td><td>${hm(o.ts)}</td><td>${TYPES[o.type]}</td><td class="r">${rs(o.total)}</td><td><span class="badge ${o.status}">${o.status}</span></td></tr>`).join("") || '<tr><td colspan="5" class="muted">No orders.</td></tr>'}</table></div></div>`;
+}
+function viewOrders() {
+  const all = can("view_all_orders"), today = isoDay(Date.now()); const d1 = all ? (ui.ofrom || today) : today, d2 = all ? (ui.oto || d1) : today, q = ui.oq.trim().toLowerCase();
+  const rows = S.orders.filter(o => { const d = isoDay(o.ts); return d >= d1 && d <= d2 && (all || o.user === me()) && (!ui.ostatus || o.status === ui.ostatus) && (!q || orderCode(o).includes(q) || (o.name || "").toLowerCase().includes(q)); }).sort((a, b) => b.ts - a.ts).slice(0, 300);
+  const paid = rows.filter(o => o.status === "paid").reduce((s, o) => s + o.total, 0);
+  return `<div class="page"><div class="card"><h1>Orders</h1><div class="filters">${all ? `<label>From<input type="date" id="ofrom" value="${d1}"></label><label>To<input type="date" id="oto" value="${d2}"></label>` : '<span class="muted">Showing your orders from today</span>'}
+    <label>Search<input id="oq" value="${esc(ui.oq)}" placeholder="Order no or customer"></label><label>Status<select id="ostatus"><option value="">All</option><option value="paid" ${ui.ostatus === "paid" ? "selected" : ""}>Paid</option><option value="refunded" ${ui.ostatus === "refunded" ? "selected" : ""}>Refunded</option></select></label></div>
+    <p class="muted">${rows.length} orders · paid total ${rs(paid)}</p><div class="scroll"><table><tr><th>Order</th><th>Time</th><th>Cashier</th><th>Type</th><th>Customer</th><th class="r">Total</th><th>Status</th><th></th></tr>
+    ${rows.map(o => `<tr><td><a href="#" data-act="order" data-v="${o.id}">${orderCode(o)}</a></td><td>${stamp(o.ts)}</td><td>${esc(o.user)}</td><td>${TYPES[o.type]}${o.table ? " · T" + esc(o.table) : ""}</td><td>${esc(o.name)}</td><td class="r">${rs(o.total)}</td><td><span class="badge ${o.status}">${o.status}</span></td><td><a href="#" data-act="receipt" data-v="${o.id}">Print</a></td></tr>`).join("") || '<tr><td colspan="8" class="muted">No orders found.</td></tr>'}</table></div></div></div>`;
+}
+function openOrder(id) {
+  const o = S.orders.find(x => x.id === id); if (!o) return;
+  showModal(`<div class="row between"><h3>Order ${orderCode(o)}</h3><span class="badge ${o.status}">${o.status}</span></div><p class="muted">${stamp(o.ts)} · ${esc(o.user)} · ${TYPES[o.type]}${o.table ? " · table " + esc(o.table) : ""}</p>
+    <table><tr><th>Item</th><th class="r">Qty</th><th class="r">Total</th></tr>${o.items.map(i => `<tr><td>${esc(i.name)}${i.addons.map(a => `<br><small>+ ${esc(a.name)}</small>`).join("")}</td><td class="r">${i.qty}</td><td class="r">${rs(i.qty * i.unit)}</td></tr>`).join("")}</table>
+    <table class="kv"><tr><td>Subtotal</td><td>${rs(o.subtotal)}</td></tr>${o.discount ? `<tr><td>Discount</td><td>-${rs(o.discount)}</td></tr>` : ""}<tr><td>${esc(S.settings.taxName)}</td><td>${rs(o.tax)}</td></tr><tr class="strong"><td>Total</td><td>${rs(o.total)}</td></tr>
+    <tr><td>Paid</td><td>${[["cash", o.pay.cash], ["card", o.pay.card], ["online", o.pay.online]].filter(p => p[1] > 0).map(p => p[0] + " " + rs(p[1])).join(", ")}</td></tr></table>
+    ${o.status === "refunded" && o.refund ? `<p class="bad">Refunded ${stamp(o.refund.ts)}. Reason: ${esc(o.refund.reason)}</p>` : ""}
+    ${o.status === "paid" && can("refund_orders") ? `<div class="card" style="margin-top:.8rem"><h2>Refund this order</h2><label>Reason (required)<input id="r-reason" maxlength="200"></label><label class="check"><input type="checkbox" id="r-stock"> Put the ingredients back into stock</label><button class="btn danger" id="r-go">Refund ${rs(o.total)}</button></div>` : ""}
+    <div class="actions"><button class="btn" id="o-r">Receipt</button><button class="btn" id="o-k">Kitchen slip</button><button class="btn primary" data-act="closeModal">Close</button></div>`, true);
+  $("#o-r").onclick = () => showReceipt(o, false); $("#o-k").onclick = () => showReceipt(o, true);
+  const go = $("#r-go"); if (go) go.onclick = () => { const reason = $("#r-reason").value.trim(); if (!reason) { toast("A reason is required."); return; } const sh = openShift();
+    o.status = "refunded"; o.refund = { ts: Date.now(), user: me(), reason, shiftId: sh ? sh.id : null }; if ($("#r-stock").checked) deduct(o.items, 1); audit("refund", orderCode(o) + " total " + o.total + " reason: " + reason); save(); hideModal(); render(); toast("Order refunded."); };
+}
+function viewDash() {
+  const t = isoDay(Date.now()), os = S.orders.filter(o => isoDay(o.ts) === t), paid = os.filter(o => o.status === "paid"), tot = paid.reduce((s, o) => s + o.total, 0), pay = { cash: 0, card: 0, online: 0 };
+  os.forEach(o => { pay.cash += o.pay.cash * (o.status === "paid" ? 1 : 0); pay.card += o.pay.card * (o.status === "paid" ? 1 : 0); pay.online += o.pay.online * (o.status === "paid" ? 1 : 0); });
+  const low = can("manage_inventory") ? S.ing.filter(i => i.stock <= i.reorder) : [], open = can("view_all_shifts") ? S.shifts.filter(s => !s.closedAt) : [];
+  const top = {}; paid.forEach(o => o.items.forEach(i => top[i.name] = (top[i.name] || 0) + i.qty)); const topL = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const recent = can("view_all_orders") ? S.orders.slice().sort((a, b) => b.ts - a.ts).slice(0, 8) : [];
+  return `<div class="page"><h1>Today at a glance</h1><div class="stats"><div class="stat"><span>Sales today</span><b>${rs(tot)}</b></div><div class="stat"><span>Orders today</span><b>${paid.length}</b></div><div class="stat"><span>Average order</span><b>${rs(paid.length ? tot / paid.length : 0)}</b></div>
+    ${Object.entries(pay).filter(p => p[1] > 0).map(p => `<div class="stat"><span>${p[0][0].toUpperCase() + p[0].slice(1)} received</span><b>${rs(p[1])}</b></div>`).join("")}</div>
+    <div class="two">${can("view_all_shifts") ? `<div class="card"><h2>Open shifts</h2><table><tr><th>Cashier</th><th>Since</th><th>Orders</th><th class="r">Drawer should hold</th></tr>${open.map(s => { const x = shiftSummary(s); return `<tr><td><a href="#" data-act="report" data-v="${s.id}">${esc(s.user)}</a></td><td>${hm(s.openedAt)}</td><td>${x.orders}</td><td class="r">${rs(x.expected)}</td></tr>`; }).join("") || '<tr><td colspan="4" class="muted">No cashier has an open shift.</td></tr>'}</table></div>` : ""}
+    ${can("manage_inventory") ? `<div class="card"><h2>Low stock</h2><table>${low.map(i => `<tr><td>${esc(i.name)}</td><td class="r bad">${fmt(i.stock)} ${i.unit}</td><td class="r muted">reorder at ${fmt(i.reorder)}</td></tr>`).join("") || '<tr><td class="good">All ingredients are above their reorder level.</td></tr>'}</table></div>` : ""}
+    <div class="card"><h2>Top items today</h2><table>${topL.map(t => `<tr><td>${esc(t[0])}</td><td class="r">${t[1]} sold</td></tr>`).join("") || '<tr><td class="muted">No sales yet today.</td></tr>'}</table></div>
+    ${can("view_all_orders") ? `<div class="card"><h2>Latest orders</h2><table>${recent.map(o => `<tr><td><a href="#" data-act="order" data-v="${o.id}">${orderCode(o)}</a></td><td>${hm(o.ts)}</td><td>${esc(o.user)}</td><td class="r">${rs(o.total)}</td><td><span class="badge ${o.status}">${o.status}</span></td></tr>`).join("")}</table></div>` : ""}</div></div>`;
+}
+function viewReports() {
+  const full = can("view_reports_full"), today = isoDay(Date.now()); const d1 = full ? (ui.from || isoDay(Date.now() - 6 * DAY)) : today, d2 = full ? (ui.to || today) : today;
+  const inR = o => { const d = isoDay(o.ts); return d >= d1 && d <= d2; }, paid = S.orders.filter(o => inR(o) && o.status === "paid"), ref = S.orders.filter(o => inR(o) && o.status === "refunded");
+  const sum = (a, f) => a.reduce((s, x) => s + f(x), 0), total = sum(paid, o => o.total), group = (keyf, valf) => { const m = {}; paid.forEach(o => keyf(o).forEach(k => { m[k[0]] = m[k[0]] || { n: 0, v: 0 }; m[k[0]].n += k[1]; m[k[0]].v += k[2]; })); return Object.entries(m).sort((a, b) => b[1].v - a[1].v); };
+  const byCat = group(o => o.items.map(i => [i.cat, i.qty, i.qty * i.unit])), byItem = group(o => o.items.map(i => [i.name, i.qty, i.qty * i.unit])).slice(0, 12), byUser = group(o => [[o.user, 1, o.total]]), byType = group(o => [[TYPES[o.type], 1, o.total]]);
+  const pm = { Cash: 0, Card: 0, Online: 0 }; S.orders.filter(inR).forEach(o => { const k = o.status === "paid" ? 1 : 0; pm.Cash += o.pay.cash * k; pm.Card += o.pay.card * k; pm.Online += o.pay.online * k; });
+  const days = {}; paid.forEach(o => days[isoDay(o.ts)] = (days[isoDay(o.ts)] || 0) + o.total); const dl = Object.entries(days).sort(), mx = Math.max(1, ...dl.map(d => d[1]));
+  const subt = sum(paid, o => o.subtotal - o.discount), cost = sum(paid, o => sum(o.items, i => i.qty * i.cost));
+  const tbl = (title, rows, unit) => `<div class="card"><h2>${title}</h2><table>${rows.map(r => `<tr><td>${esc(r[0])}</td><td class="r">${r[1].n} ${unit}</td><td class="r">${rs(r[1].v)}</td></tr>`).join("") || '<tr><td class="muted">No data for these dates.</td></tr>'}</table></div>`;
+  return `<div class="page"><h1>Sales reports</h1><div class="filters">${full ? `<label>From<input type="date" id="rfrom" value="${d1}"></label><label>To<input type="date" id="rto" value="${d2}"></label><button class="btn" data-act="csv">Download CSV</button>` : '<span class="muted">Showing today only. A role needs the "reports for any date range" token to see other dates.</span>'}</div>
+    <div class="stats"><div class="stat"><span>Total sales</span><b>${rs(total)}</b></div><div class="stat"><span>Total orders</span><b>${paid.length}</b></div><div class="stat"><span>Average order</span><b>${rs(paid.length ? total / paid.length : 0)}</b></div><div class="stat"><span>Discounts given</span><b>${rs(sum(paid, o => o.discount))}</b></div>
+    <div class="stat"><span>${esc(S.settings.taxName)} collected</span><b>${rs(sum(paid, o => o.tax))}</b></div><div class="stat"><span>Refunds (${ref.length})</span><b>${rs(sum(ref, o => o.total))}</b></div>
+    ${can("view_profit") ? `<div class="stat good"><span>Estimated profit (${subt ? Math.round((subt - cost) / subt * 100) : 0}%)</span><b>${rs(subt - cost)}</b></div><div class="stat"><span>Ingredient cost</span><b>${rs(cost)}</b></div>` : ""}</div>
+    <div class="two"><div class="card"><h2>Payment methods (net of refunds)</h2><table>${Object.entries(pm).map(p => `<tr><td>${p[0]}</td><td class="r">${rs(p[1])}</td></tr>`).join("")}</table></div>${tbl("By category", byCat, "sold")}${tbl("Top items", byItem, "sold")}${tbl("By cashier", byUser, "orders")}${tbl("By order type", byType, "orders")}
+    <div class="card"><h2>Sales per day</h2>${dl.map(d => `<div class="bar"><span>${d[0]}</span><i style="width:${Math.round(d[1] / mx * 100)}%"></i><b>${rs(d[1])}</b></div>`).join("") || '<p class="muted">No data for these dates.</p>'}</div></div></div>`;
+}
+function viewShifts() { const rows = S.shifts.slice().sort((a, b) => b.openedAt - a.openedAt).slice(0, 60);
+  return `<div class="page"><h1>Cashier shifts</h1><div class="card scroll"><table><tr><th>Cashier</th><th>Opened</th><th>Closed</th><th class="r">Opening</th><th class="r">Expected closing</th><th class="r">Counted</th><th class="r">Difference</th><th></th></tr>
+    ${rows.map(r => `<tr><td>${esc(r.user)}</td><td>${stamp(r.openedAt)}</td><td>${r.closedAt ? stamp(r.closedAt) : "open"}</td><td class="r">${rs(r.opening)}</td><td class="r">${r.closedAt ? rs(r.expected) : ""}</td><td class="r">${r.closedAt ? rs(r.counted) : ""}</td><td class="r ${r.diff && Math.abs(r.diff) > .5 ? "bad" : ""}">${r.closedAt ? rs(r.diff) : ""}</td><td><a href="#" data-act="report" data-v="${r.id}">Report</a></td></tr>`).join("")}</table></div></div>`; }
+function viewMenu() {
+  const cats = [...new Set(S.menu.map(m => m.cat))];
+  return `<div class="page"><h1>Menu and recipes</h1><div class="card"><h2>Add a menu item</h2><div class="formrow"><label>Category<input id="n-cat" list="cats-l" placeholder="Pizza"><datalist id="cats-l">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist></label><label>Name<input id="n-name" placeholder="Chicken Supreme"></label>
+    <label class="grow">Sizes and prices<input id="n-vars" placeholder="Small:650, Medium:1100, Large:1450"></label><label class="check"><input type="checkbox" id="n-add"> Allow add-ons</label><button class="btn primary" data-act="addItem">Add item</button></div><p class="muted">For one-size items write Regular:150.</p></div>
+    ${S.menu.map(m => `<div class="card" ${m.active ? "" : 'style="opacity:.55"'}><div class="formrow"><b>${esc(m.name)}</b><span class="muted">${esc(m.cat)}</span><label class="check"><input type="checkbox" data-act="toggleItem" data-v="${m.id}" ${m.active ? "checked" : ""}> On menu</label></div>
+    ${m.variants.map(v => `<div class="formrow sub"><span style="min-width:90px">${esc(v.label)}</span><label>Price<input class="short" type="number" step="any" min="0" data-act="price" data-v="${v.id}" value="${v.price}"></label><button class="btn small" data-act="recipe" data-v="${v.id}">Recipe</button></div>`).join("")}</div>`).join("")}
+    <div class="card"><h2>Add-ons (extra toppings)</h2>${S.addons.map(a => `<div class="formrow sub"><span style="min-width:120px">${esc(a.name)}</span><label>Price<input class="short" type="number" step="any" min="0" data-act="aprice" data-v="${a.id}" value="${a.price}"></label><button class="btn small" data-act="arecipe" data-v="${a.id}">Recipe</button></div>`).join("")}</div></div>`;
+}
+function openRecipe(kind, id) {
+  const rec = (kind === "v" ? S.rec : S.arec)[id] || {}, title = kind === "v" ? (() => { const f = findVariant(id); return f.it.name + " (" + f.v.label + ")"; })() : S.addons.find(a => a.id === id).name;
+  showModal(`<h3>Recipe: ${esc(title)}</h3><p class="muted">How much of each ingredient one portion uses. Stock is deducted automatically on every sale.</p><table>${S.ing.map(i => `<tr><td>${esc(i.name)}</td><td class="r"><input class="short" type="number" step="any" min="0" data-ing="${i.id}" value="${rec[i.id] || ""}"> ${i.unit}</td></tr>`).join("")}</table>
+    <div class="actions"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" id="rc-save">Save recipe</button></div>`, true);
+  $("#rc-save").onclick = () => { const r = {}; $("#mbox").querySelectorAll("[data-ing]").forEach(x => { if (+x.value > 0) r[x.dataset.ing] = +x.value; }); (kind === "v" ? S.rec : S.arec)[id] = r; audit("recipe_edit", title); save(); hideModal(); toast("Recipe saved."); };
+}
+function viewInventory() {
+  const ings = S.ing.slice().sort((a, b) => ((b.stock <= b.reorder) - (a.stock <= a.reorder)) || a.name.localeCompare(b.name)), value = S.ing.reduce((s, i) => s + i.stock * i.cost, 0), sel = `<select data-f="ing">${ings.map(i => `<option value="${i.id}">${esc(i.name)} (${i.unit})</option>`).join("")}</select>`;
+  const logs = S.log.slice().sort((a, b) => b.ts - a.ts).slice(0, 15);
+  return `<div class="page"><h1>Inventory</h1><p class="muted">Stock value at current cost: <b>${rs(value)}</b></p><div class="three">
+    <div class="card"><h2>Stock-in (purchase)</h2><label>Ingredient${sel.replace("data-f", 'id="in-ing" data-f')}</label><label>Quantity<input id="in-qty" type="number" step="any" min="0"></label><label>Cost per unit<input id="in-cost" type="number" step="any" min="0"></label><button class="btn primary" data-act="stockIn">Add stock</button></div>
+    <div class="card"><h2>Wastage</h2><label>Ingredient${sel.replace("data-f", 'id="w-ing" data-f')}</label><label>Quantity wasted<input id="w-qty" type="number" step="any" min="0"></label><label>Reason<input id="w-reason" placeholder="Expired, dropped, burnt"></label><button class="btn danger" data-act="waste">Record wastage</button></div>
+    <div class="card"><h2>Stock count</h2><label>Ingredient${sel.replace("data-f", 'id="c-ing" data-f')}</label><label>Counted quantity<input id="c-qty" type="number" step="any" min="0"></label><button class="btn" data-act="count">Set to counted</button></div></div>
+    <div class="card"><h2>Ingredients</h2><table><tr><th>Name</th><th class="r">In stock</th><th class="r">Reorder at</th><th class="r">Cost per unit</th></tr>${ings.map(i => `<tr><td>${esc(i.name)}</td><td class="r ${i.stock <= i.reorder ? "bad" : "good"}">${fmt(i.stock)} ${i.unit}</td><td class="r">${fmt(i.reorder)}</td><td class="r">${fmt(i.cost)}</td></tr>`).join("")}</table></div>
+    <div class="card"><h2>Recent stock movements</h2><table><tr><th>Time</th><th>Ingredient</th><th class="r">Change</th><th>Reason</th><th>By</th></tr>${logs.map(l => `<tr><td>${stamp(l.ts)}</td><td>${esc(l.ing)}</td><td class="r ${l.change < 0 ? "bad" : "good"}">${l.change > 0 ? "+" : ""}${fmt(l.change)}</td><td>${esc(l.reason)}</td><td>${esc(l.by)}</td></tr>`).join("")}</table></div></div>`;
+}
+function viewRoles() {
+  return `<div class="page"><h1>Roles and permission tokens</h1><p class="muted">Tick the tokens a role should have. Changes apply at once: switch the role at the top to see the screens appear or disappear. The Owner always has every token.</p>
+    ${Object.entries(S.roles).map(([k, r]) => `<div class="card"><div class="row between"><h2>${esc(r.name)} <small class="muted">(${esc(r.user)})</small></h2>${["cashier", "manager", "owner"].includes(k) ? "" : `<button class="btn small danger" data-act="delRole" data-v="${k}">Delete role</button>`}</div>
+    ${r.admin ? '<p class="good">Owner: full access to everything, always.</p>' : `<div class="perms">${PERMS.map(([p, l]) => `<label class="check"><input type="checkbox" data-act="perm" data-role="${k}" data-p="${p}" ${r.perms.includes(p) ? "checked" : ""}> ${esc(l)}</label>`).join("")}</div>`}</div>`).join("")}
+    <div class="card"><h2>Add a role</h2><div class="formrow"><label>Role name<input id="role-name" placeholder="Supervisor"></label><button class="btn primary" data-act="addRole">Create role</button></div></div></div>`;
+}
+function viewSettings() {
+  const s = S.settings, f = (k, l, t) => `<label>${l}<input data-set="${k}" type="${t || "text"}" ${t === "number" ? 'step="any" min="0"' : ""} value="${esc(s[k])}"></label>`;
+  return `<div class="page narrow"><h1>Settings</h1><div class="card">${f("shop", "Shop name")}${f("address", "Address")}${f("phone", "Phone")}${f("currency", "Currency symbol")}${f("taxName", "Tax name")}${f("taxRate", "Tax rate (%)", "number")}${f("maxDiscount", "Cashier maximum discount (%)", "number")}${f("footer", "Receipt footer message")}
+    <label class="check"><input type="checkbox" data-set="requireShift" ${s.requireShift ? "checked" : ""}> Cashiers must open a shift with an opening balance before billing</label><p class="muted">Changes save automatically.</p></div></div>`;
+}
+function viewAudit() { return `<div class="page"><h1>Audit log</h1><p class="muted">Logins, orders, refunds, price and stock changes (latest 200).</p><div class="card scroll"><table><tr><th>Time</th><th>Who</th><th>Action</th><th>Details</th></tr>${S.audit.slice().sort((a, b) => b.ts - a.ts).slice(0, 200).map(a => `<tr><td>${stamp(a.ts)}</td><td>${esc(a.who)}</td><td>${esc(a.action)}</td><td>${esc(a.detail)}</td></tr>`).join("")}</table></div></div>`; }
+
+/* ---------- shell ---------- */
+const VIEWS = { pos: viewPOS, shift: viewShift, shiftreport: viewShiftReport, orders: viewOrders, dash: viewDash, reports: viewReports, shifts: viewShifts, menu: viewMenu, inventory: viewInventory, roles: viewRoles, settings: viewSettings, audit: viewAudit };
+const allowed = () => NAV.filter(n => anyCan(n[2]));
+const firstView = () => (can("view_reports") ? "dash" : can("take_order") ? "pos" : (allowed()[0] || ["none"])[0]);
+function render() {
+  const nav = allowed(); if (!ui.view || (ui.view !== "shiftreport" && !nav.some(n => n[0] === ui.view))) ui.view = firstView();
+  const body = nav.length ? VIEWS[ui.view]() : '<div class="lock card"><h2>No access</h2><p class="muted">This role has no permission tokens. Open Roles and tokens as Owner to give it some.</p></div>';
+  $("#app").innerHTML = `<div class="demo"><span>Live demo · sample data · no login needed · everything is saved in your browser only</span><button data-act="reset">Reset demo</button></div>
+    <header class="top"><span class="brand">${esc(S.settings.shop)}</span><div class="roles"><span>View as</span>${Object.entries(S.roles).map(([k, r]) => `<button data-act="role" data-v="${k}" class="${k === S.role ? "on" : ""}">${esc(r.name)}</button>`).join("")}</div><span class="who">${esc(me())}</span></header>
+    <nav class="nav">${nav.map(n => `<button data-act="nav" data-v="${n[0]}" class="${ui.view === n[0] ? "on" : ""}">${n[1]}</button>`).join("")}</nav>${body}`;
+  if (ui.view === "pos" && $("#grid")) { drawShiftbar(); drawMenu(); drawCust(); drawCart(); }
+}
+const A = {
+  nav: el => { ui.view = el.dataset.v; render(); window.scrollTo(0, 0); },
+  role: el => { S.role = el.dataset.v; ui.view = null; ui.cart = []; save(); render(); toast("Now viewing as " + role().name); },
+  reset: () => { if (confirm("Reset the demo to its original sample data?")) { try { localStorage.removeItem(KEY); } catch (e) { } memory = null; ui = Object.assign(ui, { view: null, cart: [] }); load(); render(); toast("Demo reset."); } },
+  closeModal: hideModal, print: () => window.print(),
+  cat: el => { ui.cat = el.dataset.v; drawMenu(); },
+  item: el => openItem(+el.dataset.v),
+  type: el => { ui.type = el.dataset.v; $("#types").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === ui.type)); drawCust(); },
+  qty: el => { const l = ui.cart[+el.dataset.i]; l.qty = Math.min(99, l.qty + +el.dataset.d); if (l.qty < 1) ui.cart.splice(+el.dataset.i, 1); drawCart(); },
+  del: el => { ui.cart.splice(+el.dataset.i, 1); drawCart(); },
+  clear: () => { if (!ui.cart.length || confirm("Clear this order?")) { ui.cart = []; ui.heldId = null; drawCart(); } },
+  pay: openPay,
+  hold: () => { if (!ui.cart.length) return; const label = prompt("Name for this held order (table, customer...)", ui.table ? "Table " + ui.table : ui.name || ""); if (label === null) return;
+    S.held.push({ id: Date.now(), user: me(), label: label || "Held order", ts: Date.now(), cart: JSON.parse(JSON.stringify(ui.cart)), f: { type: ui.type, table: ui.table, name: ui.name, phone: ui.phone, addr: ui.addr, note: ui.note, dtype: ui.dtype, dval: ui.dval } }); ui.cart = []; save(); render(); toast("Order held."); },
+  held: () => { const list = S.held.filter(h => h.user === me()); showModal(`<h3>Held orders</h3>${list.map(h => `<div class="heldrow"><div><b>${esc(h.label)}</b><br><small class="muted">${hm(h.ts)} · ${h.cart.length} lines</small></div><div><button class="btn small primary" data-act="resume" data-v="${h.id}">Resume</button> <button class="btn small danger" data-act="delHeld" data-v="${h.id}">Delete</button></div></div>`).join("") || '<p class="muted">No held orders.</p>'}<div class="actions"><button class="btn" data-act="closeModal">Close</button></div>`); },
+  resume: el => { const h = S.held.find(x => x.id === +el.dataset.v); if (!h) return; if (ui.cart.length && !confirm("Replace the current order?")) return; ui.cart = h.cart; Object.assign(ui, h.f); ui.heldId = h.id; hideModal(); render(); },
+  delHeld: el => { S.held = S.held.filter(h => h.id !== +el.dataset.v); save(); render(); A.held(); },
+  openShift: () => { const v = parseFloat($("#open-bal").value); if (!(v >= 0)) { toast("Enter the opening cash (0 or more)."); return; } S.shifts.push({ id: S.id.shift++, user: me(), openedAt: Date.now(), opening: v, closedAt: null, counted: null, expected: null, diff: null }); audit("shift_open", "opening balance " + v); save(); ui.view = "pos"; render(); },
+  goShift: () => { ui.view = "shift"; render(); },
+  closeShift: () => { const sh = openShift(), c = parseFloat($("#counted").value); if (!sh || !(c >= 0)) { toast("Count the cash in the drawer and enter it."); return; } const s = shiftSummary(sh);
+    sh.closedAt = Date.now(); sh.counted = c; sh.expected = s.expected; sh.diff = r2(c - s.expected); sh.note = $("#close-note").value.trim(); audit("shift_close", "expected " + s.expected + " counted " + c + " difference " + sh.diff); save(); ui.shiftId = sh.id; ui.view = "shiftreport"; render(); },
+  report: el => { ui.shiftId = +el.dataset.v; ui.view = "shiftreport"; render(); window.scrollTo(0, 0); },
+  order: el => openOrder(+el.dataset.v),
+  receipt: el => showReceipt(S.orders.find(o => o.id === +el.dataset.v), false),
+  csv: () => { const d1 = ui.from || isoDay(Date.now() - 6 * DAY), d2 = ui.to || isoDay(Date.now()); const rows = [["Order", "Date", "Cashier", "Type", "Customer", "Subtotal", "Discount", "Tax", "Total", "Status"]].concat(S.orders.filter(o => isoDay(o.ts) >= d1 && isoDay(o.ts) <= d2).map(o => [orderCode(o), stamp(o.ts), o.user, TYPES[o.type], o.name, o.subtotal, o.discount, o.tax, o.total, o.status]));
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([rows.map(r => r.map(c => '"' + String(c ?? "").replace(/"/g, '""') + '"').join(",")).join("\n")], { type: "text/csv" })); a.download = `orders-${d1}-to-${d2}.csv`; a.click(); },
+  addItem: () => { const cat = $("#n-cat").value.trim(), name = $("#n-name").value.trim(), vars = $("#n-vars").value.split(",").map(p => p.split(":")).filter(p => p.length === 2 && p[0].trim() && +p[1] >= 0 && p[1].trim() !== "");
+    if (!cat || !name || !vars.length) { toast("Enter a category, a name and sizes like Small:650, Large:1200"); return; } S.menu.push({ id: S.id.item++, cat, name, addons: $("#n-add").checked, active: true, variants: vars.map(p => { const v = { id: S.id.v++, label: p[0].trim(), price: +p[1] }; S.rec[v.id] = {}; return v; }) }); audit("menu_add", name); save(); render(); toast("Item added."); },
+  toggleItem: el => { S.menu.find(m => m.id === +el.dataset.v).active = el.checked; save(); render(); },
+  recipe: el => openRecipe("v", +el.dataset.v), arecipe: el => openRecipe("a", +el.dataset.v),
+  stockIn: () => { const i = S.ing.find(x => x.id === +$("#in-ing").value), q = +$("#in-qty").value; if (!(q > 0)) { toast("Quantity must be more than zero."); return; } i.stock = r2(i.stock + q); if (+$("#in-cost").value > 0) i.cost = +$("#in-cost").value;
+    S.log.push({ ts: Date.now(), ing: i.name, change: q, reason: "purchase", by: me() }); audit("stock_in", i.name + " +" + q); save(); render(); toast("Stock updated."); },
+  waste: () => { const i = S.ing.find(x => x.id === +$("#w-ing").value), q = +$("#w-qty").value; if (!(q > 0)) { toast("Quantity must be more than zero."); return; } i.stock = r2(i.stock - q); S.log.push({ ts: Date.now(), ing: i.name, change: -q, reason: "wastage " + $("#w-reason").value, by: me() }); audit("wastage", i.name + " -" + q); save(); render(); toast("Wastage recorded."); },
+  count: () => { const i = S.ing.find(x => x.id === +$("#c-ing").value), q = parseFloat($("#c-qty").value); if (!(q >= 0)) { toast("Enter the counted quantity."); return; } const d = r2(q - i.stock); if (d) S.log.push({ ts: Date.now(), ing: i.name, change: d, reason: "stock count", by: me() }); i.stock = q; audit("stock_count", i.name + " -> " + q); save(); render(); toast("Stock updated."); },
+  addRole: () => { const n = $("#role-name").value.trim(); if (!n) { toast("Enter a role name."); return; } const k = "r" + Date.now(); S.roles[k] = { name: n, user: n + " (demo user)", perms: CASHIER.slice() }; audit("role_add", n); save(); render(); },
+  delRole: el => { const k = el.dataset.v; if (S.role === k) S.role = "owner"; delete S.roles[k]; save(); render(); }
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-act]"); if (!el || el.matches("input,select")) { if (e.target.id === "modal") hideModal(); return; } if (el.tagName === "A") e.preventDefault(); A[el.dataset.act]?.(el, e); });
+document.addEventListener("change", e => { const t = e.target;
+  if (t.dataset.act === "toggleItem") A.toggleItem(t);
+  else if (t.dataset.act === "price") { const f = findVariant(+t.dataset.v); audit("price_change", f.it.name + " (" + f.v.label + "): " + f.v.price + " -> " + t.value); f.v.price = +t.value || 0; save(); toast("Price saved."); }
+  else if (t.dataset.act === "aprice") { S.addons.find(a => a.id === +t.dataset.v).price = +t.value || 0; save(); toast("Price saved."); }
+  else if (t.dataset.act === "perm") { const r = S.roles[t.dataset.role]; r.perms = t.checked ? [...new Set(r.perms.concat(t.dataset.p))] : r.perms.filter(p => p !== t.dataset.p); audit("role_perms", r.name + ": " + r.perms.join(", ")); save(); toast("Token saved for " + r.name + "."); }
+  else if (t.dataset.set) { const k = t.dataset.set; S.settings[k] = t.type === "checkbox" ? t.checked : t.type === "number" ? +t.value : t.value; save(); if (k === "shop") render(); }
+  else if (t.id === "ofrom" || t.id === "oto" || t.id === "ostatus") { ui.ofrom = $("#ofrom")?.value || null; ui.oto = $("#oto")?.value || null; ui.ostatus = $("#ostatus").value; render(); }
+  else if (t.id === "rfrom" || t.id === "rto") { ui.from = $("#rfrom").value; ui.to = $("#rto").value; render(); } });
+document.addEventListener("input", e => { const t = e.target;
+  if (t.id === "search") { ui.search = t.value; drawMenu(); } else if (t.id === "f-note") ui.note = t.value; else if (t.dataset.k) ui[t.dataset.k] = t.value;
+  else if (t.id === "dval" || t.id === "dtype") { ui.dval = $("#dval").value; ui.dtype = $("#dtype").value; drawCart(); }
+  else if (t.id === "oq") { ui.oq = t.value; const p = t.selectionStart; render(); const n = $("#oq"); n.focus(); n.setSelectionRange(p, p); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape") hideModal(); });
+load(); render();
+})();
+</script>
+</body>
+</html>
